@@ -1,0 +1,24 @@
+tuntemplatename:tun_gen.sh
+montemplatename:mon_gen.sh
+exetemplatename:rev_gen.sh
+nodename:NODE_NAME_HERE
+cscreenname:kar
+mscreenname:kam
+reversiuser:reversi
+reversisshport:22
+reversihost:reversserver_IP
+reversiport:55555
+fwdhost:localhost
+fwdport:22
+fwdportstr:SSH-2.0-OpenSSH_7.6p1
+fwdportstr_FOR_OPENWRT:SSH-2.0-dropbear
+reversisshkey:reversiclient7.key
+reversisshkey_FOR_OPEMWRT:openwrt.key
+RETRYCONTIME:if the connection is dropped from client end, retry time
+cretrysecs:15
+MONRETRYSECS:the time to wait between monitor attempts, if a connection is stable or bandwidth is costly thn reduce this
+mretrysecs:30
+SLEEPBEFORE:num secs to sleep before first attempt
+cbeforesecs:30
+SUFFSECONDS:num secs to wait between stuffing screens (slow devices need more)
+stuffsecs:3
