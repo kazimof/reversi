@@ -1,7 +1,10 @@
-setting up server:
+SETTING UP THE REVERSI SERVER
 
-PLACING THE SCRIPT
-------------------
+LOCATION and PERMISSIONS
+------------------------
+I have no doubt there are exploits, I am hoping this release on github will reveal them.  
+Therefore I ADVISE YOU DO NOT use root to install the server side scripts.
+ 
 choose the reversi username and add user [reversi]
 create a dir called reversi in this users home [/home/reversi/reversi]
 in there place the followig files:
@@ -21,6 +24,11 @@ command="/root/reversi/server_port_mon.sh $SSH_ORIGINAL_COMMAND" ssh-rsa AAAAB3N
 
 NOTE that bash ssh-keygen will not work for openwrt auth, dropbear has a specific method of generating the key, this can be done from any openwrt device and you can use that key.
 
+- dont forget:
+1) ensure all files are chown username, with chmod +x for scripts
+2) server firewall is open on rsshport
+
+
 TESTING
 -------
 on server, tail -f logs/ports.log
@@ -34,20 +42,16 @@ killing PID...
 2016-12-25-00-02-55555.testing.XXXXXXXXXXX UNKNOWN
 
 ###### also logged this error, due to server firewall issues (when using NULL for port fingerprint)
+BAD PORT OR SERVERNAME
 telnet: Unable to connect to remote host: Connection refused
 60
 
-- dont forget:
-1) ensure all files are chown username, with chmod +x for scripts
-2) server firewall is open on rsshport
+BAD USER OR PORT OR KEY:  
+/root/reversiclient-7/kam50012REV.sh: 12: [: Illegal number:
 
 
 SETTING UP CLIENT
 ##################
-So this "service" needs to run on a variety of client OS, we are running a mix of openwrt devices, linux servers and OSX, I needed solutions for them all and I am too lazy to maintain multiple forks. The 2 programs available to all are: 
-screen
-ssh
-
 There are some special measures to take for SOME openwrt devices such as those with too little space to install screen and dependencies upon boot and to reboot if the first install attempts happenned while the net was down.
 
 CREATE client tar
@@ -57,14 +61,22 @@ while in root dir: untar reversi-client.tar.gz
 #tar xvfz reversi.tar.gz
 
 
+DOCS - WORK IN PROGRESS
 
 
 
+===========TODO========= 
+echo "send also a password per port to authenicate the device this was installed on, this could be an md5sum of the disk partition sector or some other unique ID for the client-device. To do this we'd need to break the ease we have of adopting a new client by registering something about clients on the reversi-server. An alternative would be an ssh capability for the reversi user into the clients to test their unique ID. This opens up the possibility of the reversi user being used to exploit all devices - NOT ACCEPTABLE"
+
+echo "Allow low port numbers, normally inadvisable EXCEPT in the case where you are really forwarding a low port"
+
+echo "patch logger for monitoring https://blog.rootshell.be/2009/03/01/keep-an-eye-on-ssh-forwarding/"
+
+echo "Sanity check port duplicates by scanning sources directory for duplicate port allocations"
 
 
-TROUBLE========= 
 
-BAD USER:  
-/root/reversiclient-7/kam50012REV.sh: 12: [: Illegal number:
+============================USEFUL SOURCES======================
+http://askubuntu.com/questions/48129/how-to-create-a-restricted-ssh-user-for-port-forwarding
 
 
