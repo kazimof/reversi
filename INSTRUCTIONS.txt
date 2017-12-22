@@ -1,72 +1,231 @@
-SETTING UP THE REVERSI SERVER
+# reversi-server and reversiclient
+# Author: kazimof at zzero dot org
 
-LOCATION and PERMISSIONS
-------------------------
-I have no doubt there are exploits, I am hoping this release on github will reveal them.  
-Therefore I ADVISE YOU DO NOT use root to install the server side scripts.
- 
-choose the reversi username and add user [reversi]
-create a dir called reversi in this users home [/home/reversi/reversi]
-in there place the followig files:
-server_port_mon.sh
-timeout3.sh
-change file ownership [chown reversi:reversi *]
-make a dir called: logs
+#    This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    http://www.gnu.org/licenses/.
+
+A SETTING UP THE REVERSI SERVER
+B RUNNING THE CLIENT CREATOR
+C DEPLOYING CLIENT SCRIPTS 
 
 
-AUTHENTICATION
---------------
-create your authorized_keys file:
-create a password-free ssh key and add the plublic key to [/home/reversi/.ssh/authorized_keys2]
-prepend the key line with command="/root/reversi/server_port_mon.sh $SSH_ORIGINAL_COMMAND" {a space is needed, then continue with key here}
-The resulting authorized_keys2 file will look something like this:
-command="/root/reversi/server_port_mon.sh $SSH_ORIGINAL_COMMAND" ssh-rsa AAAAB3NzaC1yc2EAAAAAAAAB3NzaC1yc2EAAAAC1yc2EAAAAAAAAB3NzaC1yc2EAAAAC1yc2EAAAAAAAAB3NzaC1yc2EAAAAC1yc2EAAAAAAAAB3NzaC1yc2EAAAAC1yc2EAAAAAAAAB3NzaC1yc2EAAAAC1yc2EAAAAAAAAB3NzaC1yc2EAAAAC1yc2EAAAAAAAAB3NzaC1yc2EAAAA user@localhost
 
-NOTE that bash ssh-keygen will not work for openwrt auth, dropbear has a specific method of generating the key, this can be done from any openwrt device and you can use that key.
 
-- dont forget:
-1) ensure all files are chown username, with chmod +x for scripts
-2) server firewall is open on rsshport
+A SETTING UP THE REVERSI SERVER
+
+SECURITY WARNING: I have no doubt there are exploits, I am hoping this release on github will reveal them. So, DO NOT USE ROOT to run the server side scripts.
+
+Probably your in a hurry and you just want to get this working right?
+I'll write the setup instructions in bash cos that'll be easier for all of us.
+
+cd /root/
+git clone git://github.com/kazimof/reversi.git
+cd reversi
+tree .
+.
+├── client-builder
+│   ├── keys
+│   │   └── README
+│   ├── libs
+│   │   └── reversiclientlib.sh
+│   ├── resources
+│   │   ├── openwrt_install_screen.sh
+│   │   ├── pingtest.sh
+│   │   └── tcdo.sh
+│   ├── setup.sh
+│   ├── sources
+│   │   ├── README
+│   │   └── ssh.rev.EXAMPLE
+│   ├── sourcestore
+│   │   └── README
+│   └── templates
+│       ├── mon_gen.sh
+│       ├── rev_gen.sh
+│       ├── rev_screen.sh
+│       └── tun_gen.sh
+├── INSTRUCTIONS.txt
+├── README.md
+└── reversi
+    ├── archive_month.sh
+    ├── devscripts
+    │   ├── checkserveruptime.sh
+    │   └── r.sh
+    ├── logs
+    │   └── ports.log
+    ├── server_port_mon.sh
+    └── timeout3.sh
+useradd -m reversi
+mv reversi /home/reversi/
+chown reversi:reversi /home/reversi/reversi -R
+su reversi
+ssh root@localhost
+CTRL-C (at prompt)
+exit
+(I was just creating a .ssh dir for reversi with correct perms)
+ssh-keygen -t rsa -b 4096 -f /home/reversi/.ssh/reversibash.key
+cd /home/reversi/.ssh/
+echo "command=\"/home/reversi/reversi/server_port_mon.sh \$SSH_ORIGINAL_COMMAND\" $(cat reversibash.key.pub)" > chown reversi:reversi authorized_keys2
+
+
+#TO TEST A CONNECTION
+#from another terminal:
+ssh-agent bash #just clearing any ssh keys I have in there
+ssh -i /home/reversi/.ssh/reversibash.key reversi@localhost  1 2 3 4 
+0
+tail /home/reversi/reversi/logs/ports.log
+WARNING: -2.1.3 suspicious request
+ssh -i /home/reversi/.ssh/reversibash.key reversi@localhost  1 2 3 4 
+0
+ssh -i /home/reversi/.ssh/reversibash.key reversi@localhost  1 60000 3 4
+60
+
+tail /home/reversi/reversi/logs/ports.log
+WARNING: -2.1.3 suspicious request
+tunnel process ID: 
+WARNING: NO PID ACCOCIATED WITH 60000
+2017-12-21-22-20-60000.1.3 DOWN
+killing PID...
+2017-12-21-22-20-60000.1.3 UNKNOWN
+
+# If the everything shows up as above reversi server is working! 
+
+SERVER SETUP - TROUBLESHOOTING
+=================================
+
+ssh: connect to host localhost port 22: Connection refused
+------------------
+#ssh server is off
+
+telnet: Unable to connect to remote host: Connection refused
+---------------------
+#firewall issue
+
+you can no longer ssh to your own server
+----------------------------------------
+#this is probbaly fail2ban which did not like the initial rapid reverse ssh connections you made 
+#carry your key via another server and log in to your reversi-server OR wait  
+#on reverersi-server run:
+fail2ban-client status sshd
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed:	1
+|  |- Total failed:	4907
+|  `- File list:	/var/log/auth.log
+`- Actions
+   |- Currently banned:	1
+   |- Total banned:	532
+   `- Banned IP list:	212.212.212.212
+fail2ban-client set sshd unbanip 212.212.212.212
+
+B RUNNING THE CLIENT CREATOR
+============================
+
+cd /root/reversi/client-builder
+tree .
+├── build
+├── keys
+│   ├── README
+├── libs
+│   └── reversiclientlib.sh
+├── resources
+│   ├── openwrt_install_screen.sh
+│   ├── pingtest.sh
+│   └── tcdo.sh
+├── setup.sh
+├── sources
+│   ├── README
+│   └── ssh.rev.EXAMPLE
+├── sourcestore
+│   └── README
+└── templates
+    ├── mon_gen.sh
+    ├── rev_gen.sh
+    ├── rev_screen.sh
+    └── tun_gen.sh
+mv /home/reversi/.ssh/reversibash.key /home/reversi/client-builder/keys/
+cd /home/reversi/client-builder/sources
+cp ssh.rev.EXAMPLE ssh.rev
+vi ssh.rev
+#configure as you need, the variable names are self explanatory
+:wq
+cd ..
+./setup.sh build
+#various output
+./setup.sh bundle
+#various output
+
+In the current directory there should be tar of your client scripts.
+
+
+C DEPLOYING CLIENT SCRIPTS - Linux/MacOS
+##################
+apt-get install screen
+#get your copy of the client tar file into the root dir
+tar xvf nodename.tar
+cd reversiclient-7
+tree .
+.
+├── kam50012REV.sh
+├── kar50012REV.sh
+├── openwrt_install_screen.sh
+├── pingtest.sh
+├── reversibash.key
+├── reversi.sh
+├── ssh.rev
+└── tcdo.sh
+
+#edit /etc/rc.local and insert the following ABOVE the line: touch /var/lock/subsys/local
+/root/reversiclient-7/reversi.sh
+
+C DEPLOYING CLIENT SCRIPTS - OpenWRT
+###########################
+There are some special measures to take for SOME openwrt devices such as those with too little space to install screen and dependencies upon boot and to reboot if the first install attempts happenned while the net was down.
+
+#edit /etc/rc.local and insert the following ABOVE the line: "exit 0" and/or "touch /var/lock/subsys/local"
+
+/root/reversiclient-7/openwrt_install_screen.sh
+/root/reversiclient-7/reversi.sh
+exit 0
+
+At premises where you may not have physical access (such as authorised surveillance installations, locations with staff too scared to reboot tech etc) the OpenWRT box may not have access netork upon boot and therefore will not run the screen install at startup. In this case add this entry to the crontab to check on net and reversi status every 15 mins and take action if everything is not running as expected.  
+
+*/15 * * * * pingtest.sh 8.8.8.8
 
 
 TESTING
--------
-on server, tail -f logs/ports.log
-copy the ssh key to a test source, use ssh 
-remove active keys (ssh-add -d) OR use ssh-agent bash to hide your existing keys
-ssh -i reversiclient7.key reversi@myserver testing 55555 XXXXXXXXXXX
-IF the auth is working you shouild see something like :
-
-2016-12-25-00-02-55555.testing.XXXXXXXXXXX DOWN
-killing PID...
-2016-12-25-00-02-55555.testing.XXXXXXXXXXX UNKNOWN
-
-###### also logged this error, due to server firewall issues (when using NULL for port fingerprint)
-BAD PORT OR SERVERNAME
-telnet: Unable to connect to remote host: Connection refused
+#######
+ssh-agent bash
+/root/reversiclient-7/reversi.sh
+setting up screens:
+screen creator and stuffer
+No screen session found.
+No screen session found.
+screen -ls
+16457.kam50001	(21/12/17 23:05:55)	(Detached)
+16445.kar50001	(21/12/17 23:05:49)	(Detached)
+screen -r kam
+IMPORTANT!!!!!!!!!!!!!
+YOU MUST NOT CARRY another working key when you run this for testing or you will get erro such as - integer expression expected
+IMPORTANT!!!!!!!!!!!!!
 60
-
-BAD USER OR PORT OR KEY:  
-/root/reversiclient-7/kam50012REV.sh: 12: [: Illegal number:
-
-
-SETTING UP CLIENT
-##################
-There are some special measures to take for SOME openwrt devices such as those with too little space to install screen and dependencies upon boot and to reboot if the first install attempts happenned while the net was down.
-
-CREATE client tar
-##################
-use the root account on your client devicei, or fix the need to have access to the temp folder  /reversiclientX
-while in root dir: untar reversi-client.tar.gz
-#tar xvfz reversi.tar.gz
-
-
-DOCS - WORK IN PROGRESS
+CTRL-ad
+screen -r kar
+CONNECTING TO SERVER reversi-server-IP
+CTRL-ad
 
 
 
 ===========TODO========= 
-echo "send also a password per port to authenicate the device this was installed on, this could be an md5sum of the disk partition sector or some other unique ID for the client-device. To do this we'd need to break the ease we have of adopting a new client by registering something about clients on the reversi-server. An alternative would be an ssh capability for the reversi user into the clients to test their unique ID. This opens up the possibility of the reversi user being used to exploit all devices - NOT ACCEPTABLE"
+echo "send also a password per portto authenicate the device this was installed on, this could be an md5sum of the disk partition sector or some other unique ID for the client-device. To do this we'd need to break the ease we have of adopting a new client by registering something about clients on the reversi-server. An alternative would be an ssh capability for the reversi user into the clients to test their unique ID. This opens up the possibility of the reversi user being used to exploit all devices - NOT ACCEPTABLE"
 
 echo "Allow low port numbers, normally inadvisable EXCEPT in the case where you are really forwarding a low port"
 
