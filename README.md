@@ -1,3 +1,4 @@
+# reversi
 # reversi-server and reversiclient
 # Author: kazimof at zzero dot org
 
