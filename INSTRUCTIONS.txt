@@ -13,12 +13,17 @@
 #
 #    http://www.gnu.org/licenses/.
 
+greeting and disclaimer: I have paid almost no attention to error trapping, although I have tried to ensure that errors don't result in harm. This system is in currently production use on several hundred devices and I have yet to have a system fail to check in. The only recurring issues are with some installations of openwrt see notes below regarding no-net-on-reboot.
+
+Anyhow, the system concept and design are here for you to run with, feel free to borrow and learn from the code. I don't pretend that my programming is anything to write home about, there are those far more skilled than I and I have learned everything I know from them. 
+
+kazim
+
 A SETTING UP THE REVERSI SERVER
 B RUNNING THE CLIENT CREATOR
 C DEPLOYING CLIENT SCRIPTS 
 
-
-
+==============================================
 
 A SETTING UP THE REVERSI SERVER
 
