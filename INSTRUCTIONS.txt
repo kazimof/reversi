@@ -78,7 +78,7 @@ exit
 (I was just creating a .ssh dir for reversi with correct perms)
 ssh-keygen -t rsa -b 4096 -f /home/reversi/.ssh/reversibash.key
 cd /home/reversi/.ssh/
-echo "command=\"/home/reversi/reversi/server_port_mon.sh \$SSH_ORIGINAL_COMMAND\" $(cat reversibash.key.pub)" > chown reversi:reversi authorized_keys2
+echo "command=\"/home/reversi/reversi/server_port_mon.sh \$SSH_ORIGINAL_COMMAND\" $(cat reversibash.key.pub)" > authorized_keys2 && chown reversi:reversi authorized_keys2
 
 
 #TO TEST A CONNECTION
