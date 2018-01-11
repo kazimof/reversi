@@ -3,14 +3,14 @@
 
 echo "TODO SECURITY"
 echo "send also a password per port to authenicate the device this was installed on"
-echo "prevent low port numbers from being accepted for a kill"
 echo "secure with http://askubuntu.com/questions/48129/how-to-create-a-restricted-ssh-user-for-port-forwarding"
 echo "patch logger for monitoring https://blog.rootshell.be/2009/03/01/keep-an-eye-on-ssh-forwarding/"
 
-echo "TODO SECURITY"
+echo "TODO USABILITY"
 echo "Sanity check port duplicates by scanning sources directory for duplicate port allocations"
+echo "ensure cvorrect args passed or abort"
 
-REVUSER="reversii" #AAAAAA
+REVUSER="reversi" #AAAAAA
 V=7
 APPDIR=$( cd "$( dirname "$0" )" && pwd )
 cd $APPDIR 
@@ -97,6 +97,14 @@ for cfile in $SOURCEDIR/*.rev; do
 		sed -i "s/\[MSCNAME\]/$mscname/g" $opname
 		sed -i "s/\[CSCNAME\]/$cscname/g" $monname
 		sed -i "s/\[MSCNAME\]/$mscname/g" $monname
+		sed -i "s/\[REVERSISSHPORT\]/${keys[reversisshport]}/g" $opname
+		sed -i "s/\[REVERSISSHPORT\]/${keys[reversisshport]}/g" $monname
+		if [ "${keys[allowinternet]}" == "1" ] 
+		then
+			sed -i "s/\[ALLOWINTERNET\]/-g/g" $opname
+		else
+			sed -i "s/\[ALLOWINTERNET\]/ /g" $opname
+		fi
 		for i in "${!keys[@]}"; do 
 			ele="$i"
 			dat=${keys[$i]}

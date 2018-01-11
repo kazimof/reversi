@@ -7,7 +7,7 @@ until [ 1 = 0 ]; do
 	echo "IMPORTANT!!!!!!!!!!!!!"
 	echo "YOU MUST NOT CARRY another working key when you run this for testing or you will get erro such as - integer expression expected"
 	echo "IMPORTANT!!!!!!!!!!!!!"
-	UPCODE=$(ssh -y -o StrictHostKeyChecking=no -o ServerAliveInterval=5 -o ConnectTimeout=5 [reversiuser]@[reversihost] -i [INSTALLDIR]/[reversisshkey] '[nodename]' '[reversiport]' '[fwdportstr]')
+	UPCODE=$(ssh -y -o StrictHostKeyChecking=no -p [REVERSISSHPORT] -o ServerAliveInterval=5 -o ConnectTimeout=5 [reversiuser]@[reversihost] -i [INSTALLDIR]/[reversisshkey] '[nodename]' '[reversiport]' '[fwdportstr]')
 	echo $UPCODE
 	if [ "$UPCODE" -ne "0" ]
 	then
