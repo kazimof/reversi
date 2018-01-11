@@ -79,7 +79,11 @@ exit
 ssh-keygen -t rsa -b 4096 -f /home/reversi/.ssh/reversibash.key
 cd /home/reversi/.ssh/
 echo "command=\"/home/reversi/reversi/server_port_mon.sh \$SSH_ORIGINAL_COMMAND\" $(cat reversibash.key.pub)" > authorized_keys2 && chown reversi:reversi authorized_keys2
-
+vi /etc/ssh/sshd_config
+GatewayPorts yes
+(allows indirect connections to reversi) 
+service sshd restart 
+(may be service sshd on some distros) 
 
 #TO TEST A CONNECTION
 #from another terminal:
